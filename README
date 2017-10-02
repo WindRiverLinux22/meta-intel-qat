@@ -1,18 +1,40 @@
-meta-qat
-========
+meta-intel-qat
+==============
 
-This README file contains information on building and booting
-meta-intel BSP layers.  Please see the corresponding sections below
+This README file contains information on adding and building
+meta-intel-qat layer.  Please see the corresponding sections below
 for details.
 
 
 Yocto Project Compatible
 ========================
 
-The BSPs contained in this layer are compatible with the Yocto Project
+This layer are compatible with the Yocto Project
 as per the requirements listed here:
 
   https://www.yoctoproject.org/webform/yocto-project-compatible-registration
+
+
+Supported QAT Version
+======================
+
+This layer provides the following QuickAssist Technology Software with their
+corresponding supported hardware
+
+  1) QATmux.L.2.6.0-60 - Intel Communication Chipset 8925 to 8955 Series
+
+For additional information for these QAT software and documentation, please go
+to https://01.org/intel-quickassist-technology
+
+
+Additional QAT Features
+=======================
+
+Apart from the QAT Software Packages, this layer includes recipes for several
+other software necessary for the QAT on various acceleration tasks
+
+  1) QAT Zlib Compression Shim Layer version 0.4.7-002
+  2) QAT libcrypto Sample Patch for OpenSSL 1.0.1 version 0.4.9-002
 
 
 Dependencies
