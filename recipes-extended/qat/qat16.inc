@@ -16,10 +16,10 @@ SRC_URI="file://qat16_2.3.0-34-qat-fix-for-cross-compilation-issue.patch \
          file://qat16_2.3.0-34-make-sure-CFLAGS-are-correct.patch \
          file://qat16_2.5.0-80-qat-change-in-return-type-of-func-in-kernel-v4.4.patch \
          file://qat16_2.5.0-80-qat-Added-include-dir-path.patch \
+         file://qat16-Osal-fix-build-with-x32.patch \
          "
 
 COMPATIBLE_MACHINE = "null"
-COMPATIBLE_HOST_linux-gnux32 = "null"
 
 S = "${WORKDIR}/${ICP_DRIVER_TYPE}"
 ICP_TOOLS = "accelcomp"
