@@ -18,3 +18,12 @@ SRC_URI="https://01.org/sites/default/files/downloads/intelr-quickassist-technol
 
 SRC_URI[md5sum] = "ee059cf134486f5684466555e8636ee0"
 SRC_URI[sha256sum] = "84d2c4a242987548135274da7c3def31461af6f1b4beb74f519a993e854abf5b"
+
+# Support for 4.14 not yet available
+python () {
+    if d.getVar("PREFERRED_PROVIDER_virtual/kernel") == "linux-intel" and \
+       d.getVar("PREFERRED_VERSION_linux-intel") == "4.14%" or \
+       d.getVar("PREFERRED_PROVIDER_virtual/kernel") == "linux-intel-rt" and \
+       d.getVar("PREFERRED_VERSION_linux-intel-rt") == "4.14%":
+        raise bb.parse.SkipPackage("This version of QAT has not been tested with Linux Kernel 4.14 or newer")
+}

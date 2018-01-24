@@ -121,3 +121,12 @@ FILES_${PN}-dbg += "${sysconfdir}/init.d/.debug"
 FILES_${PN}-app += "${bindir}/*"
 
 EXCLUDE_FROM_WORLD_core2-32-intel-common = "1"
+
+# Support for 4.14 not yet available
+python () {
+    if d.getVar("PREFERRED_PROVIDER_virtual/kernel") == "linux-intel" and \
+       d.getVar("PREFERRED_VERSION_linux-intel") == "4.14%" or \
+       d.getVar("PREFERRED_PROVIDER_virtual/kernel") == "linux-intel-rt" and \
+       d.getVar("PREFERRED_VERSION_linux-intel-rt") == "4.14%":
+        raise bb.parse.SkipPackage("This version of QAT has not been tested with Linux Kernel 4.14 or newer.")
+}
