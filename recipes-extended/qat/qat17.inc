@@ -18,6 +18,8 @@ SRC_URI="file://qat16_2.3.0-34-qat-fix-for-cross-compilation-issue.patch \
          "
 #https://01.org/sites/default/files/page/qatmux.l.${PV}.tgz;name=qat
 COMPATIBLE_MACHINE = "crystalforest|intel-corei7-64|intel-core2-32"
+COMPATIBLE_HOST_x86-x32 = 'null'
+COMPATIBLE_HOST_libc-musl_class-target = 'null'
 
 S = "${WORKDIR}"
 ICP_TOOLS = "accelcomp"
