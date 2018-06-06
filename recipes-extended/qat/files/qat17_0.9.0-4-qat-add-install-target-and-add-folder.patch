@@ -1,14 +1,19 @@
-From 9f190755ea165cd2391cfa5b5a54dfe00961f72c Mon Sep 17 00:00:00 2001
-From: "Goh, Wen Sen" <wen.sen.goh@intel.com>
-Date: Fri, 18 Nov 2016 10:52:37 +0800
+From 22963fed4e9017ca05855bd2373e2467f45ebe30 Mon Sep 17 00:00:00 2001
+From: "Tan, Raymond" <raymond.tan@intel.com>
+Date: Mon, 4 Jun 2018 09:26:33 +0800
 Subject: [PATCH] qat-add-install-target-and-add-folder
 
+Upstream-Status: Inappropriate [Configuration]
+
+Modify Makefile to add install target and add folder
+
+Signed-off-by: Tan, Raymond <raymond.tan@intel.com>
 ---
- quickassist/Makefile | 30 +++++++++++++++++++++++++++---
- 1 file changed, 27 insertions(+), 3 deletions(-)
+ quickassist/Makefile | 25 ++++++++++++++++++++++---
+ 1 file changed, 22 insertions(+), 3 deletions(-)
 
 diff --git a/quickassist/Makefile b/quickassist/Makefile
-index 4cbff53..b57779b 100644
+index 3e08241..1647d9e 100644
 --- a/quickassist/Makefile
 +++ b/quickassist/Makefile
 @@ -64,6 +64,7 @@ ICP_BUILD_OUTPUT?=build_$(DATE)
@@ -16,43 +21,36 @@ index 4cbff53..b57779b 100644
  export ICP_ACCEL_INC=YES
  LAC_LIB_DIR=$(LAC_PATH)/build/libs
 +MODULE_INSTALLPATH=$(SAMPLE_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat
-
+ 
  #Release Package build steps
  ALL_TARGETS =  clean lac_lib_dir qat_direct libosal_user lac_user
-@@ -80,10 +81,21 @@ all: $(ALL_TARGETS)
-
+@@ -80,10 +81,14 @@ all: $(ALL_TARGETS)
+ 
  user: lac_lib_dir libosal_user lac_user
-
+ 
 +install: output_dir install_scripts
-+	@cp $(KO_INTEL_QAT)/intel_qat.ko $(MODULE_INSTALLPATH)/qat_common;
-+	@cp $(KO_QAT_C3XXX)/qat_c3xxx.ko $(MODULE_INSTALLPATH)/qat_c3xxx;
-+	@cp $(KO_QAT_C3XXXVF)/qat_c3xxxvf.ko $(MODULE_INSTALLPATH)/qat_c3xxxvf;
-+	@cp $(KO_QAT_C62X)/qat_c62x.ko $(MODULE_INSTALLPATH)/qat_c62x;
-+	@cp $(KO_QAT_C62XVF)/qat_c62xvf.ko $(MODULE_INSTALLPATH)/qat_c62xvf;
-+	@cp $(KO_QAT_DH895XCC)/qat_dh895xcc.ko $(MODULE_INSTALLPATH)/qat_dh895xcc;
-+	@cp $(KO_QAT_DH895XCCVF)/qat_dh895xccvf.ko $(MODULE_INSTALLPATH)/qat_dh895xccvf;
 +	@cp $(ICP_ROOT)/quickassist/utilities/libusdm_drv/usdm_drv.ko $(MODULE_INSTALLPATH);
 +	@cp $(ICP_ROOT)/quickassist/lookaside/access_layer/src/sample_code/performance/build/linux_2.6/user_space/cpa_sample_code $(ICP_BUILD_OUTPUT)$(DEST_BINDIR);
 +
  install_scripts:
-	@echo ; echo 'Copying Install Scripts';
+ 	@echo ; echo 'Copying Install Scripts';
 -	@cp $(ICP_BUILDSYSTEM_PATH)/build_files/qat_service $(ICP_BUILD_OUTPUT)/;
 -	@chmod 750 $(ICP_BUILD_OUTPUT)/qat_service;
 +	@cp $(ICP_BUILDSYSTEM_PATH)/build_files/qat_service $(ICP_BUILD_OUTPUT)/etc/init.d;
 +	@chmod 750 $(ICP_BUILD_OUTPUT)/etc/init.d/qat_service;
-
+ 
  #
  # Common memory driver
-@@ -143,8 +155,20 @@ ifeq ($(ICP_NO_CLEAN),)
+@@ -143,8 +148,22 @@ ifeq ($(ICP_NO_CLEAN),)
  endif
-
-
+ 
+ 
 -output_dir: clean
 +output_dir:
-	test -d $(ICP_BUILD_OUTPUT) || mkdir -p $(ICP_BUILD_OUTPUT);
+ 	test -d $(ICP_BUILD_OUTPUT) || mkdir -p $(ICP_BUILD_OUTPUT);
 +	test -d $(ICP_BUILD_OUTPUT)$(DEST_LIBDIR) || mkdir -p $(ICP_BUILD_OUTPUT)$(DEST_LIBDIR);
 +	test -d $(ICP_BUILD_OUTPUT)$(DEST_BINDIR) || mkdir -p $(ICP_BUILD_OUTPUT)$(DEST_BINDIR);
-+	test -d $(ICP_BUILD_OUTPUT)/lib/firmware/$(ICP_FIRMWARE_DIR) || mkdir -p $(ICP_BUILD_OUTPUT)/lib/firmware/$(ICP_FIRMWARE_DIR);
++	test -d $(ICP_BUILD_OUTPUT)/lib/firmware || mkdir -p $(ICP_BUILD_OUTPUT)/lib/firmware;
 +	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat;
 +	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_common || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_common;
 +	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_c3xxx || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_c3xxx;
@@ -61,9 +59,12 @@ index 4cbff53..b57779b 100644
 +	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_c62xvf || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_c62xvf;
 +	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_dh895xcc || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_dh895xcc;
 +	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_dh895xccvf || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_dh895xccvf;
++	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_d15xx || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_d15xx;
++	test -d $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_d15xxvf || mkdir -p $(ICP_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat/qat_d15xxvf;
 +	test -d $(ICP_BUILD_OUTPUT)/etc/init.d || mkdir -p $(ICP_BUILD_OUTPUT)/etc/init.d;
-
+ 
  lac_lib_dir: clean
-	test -d $(LAC_LIB_DIR) || mkdir -p $(LAC_LIB_DIR);
---
+ 	test -d $(LAC_LIB_DIR) || mkdir -p $(LAC_LIB_DIR);
+-- 
 1.9.1
+
