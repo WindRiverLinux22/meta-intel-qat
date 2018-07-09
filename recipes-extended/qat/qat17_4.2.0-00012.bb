@@ -21,8 +21,8 @@ SRC_URI="https://01.org/sites/default/files/downloads/intelr-quickassist-technol
          file://qat17_4.1.0-00022-qat-use-static-lib-for-linking.patch \
          "
 
-SRC_URI[md5sum] = "29ab942f9c151d3c0e025accfd971ee6"
-SRC_URI[sha256sum] = "6caa72c65b9350f1708b2ed341e40ae3c6881953c501d0fbb7e2f8affaa5e025"
+SRC_URI[md5sum] = "2fe81587e8b85747d5461b031241beb2"
+SRC_URI[sha256sum] = "47990b3283ded748799dba42d4b0e1bdc0be3cf3978bd587533cd12788b03856"
 
 COMPATIBLE_MACHINE = "null"
 COMPATIBLE_HOST_x86-x32 = 'null'
