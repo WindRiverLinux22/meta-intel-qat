@@ -34,7 +34,6 @@ Apart from the QAT Software Packages, this layer includes recipes for several
 other software necessary for the QAT on various acceleration tasks
 
   1) QAT Zlib Compression Shim Layer version 0.4.7-002
-  2) QAT libcrypto Sample Patch for OpenSSL 1.0.1 version 0.4.9-002
 
 
 Dependencies
