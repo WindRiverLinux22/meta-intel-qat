@@ -78,6 +78,9 @@ do_compile () {
   cd ${S}/quickassist/utilities/libusdm_drv
   oe_runmake
 
+  cd ${S}/quickassist/lookaside/access_layer/src/qat_direct/src/
+  oe_runmake
+
   #build the whole sample code: per_user only
   cd ${SAMPLE_CODE_DIR}
   oe_runmake 'perf_user'
@@ -96,6 +99,9 @@ do_install() {
   install -d ${D}${sbindir}
   install -d ${D}${sysconfdir}/conf_files
   install -d ${D}${prefix}/src/qat
+  install -d ${D}${includedir}
+  install -d ${D}${includedir}/dc
+  install -d ${D}${includedir}/lac
 
   echo 'KERNEL=="qat_adf_ctl" MODE="0660" GROUP="qat"' > ${D}/etc/udev/rules.d/00-qat.rules
   echo 'KERNEL=="qat_dev_processes" MODE="0660" GROUP="qat"' >> ${D}/etc/udev/rules.d/00-qat.rules
@@ -104,7 +110,12 @@ do_install() {
   echo 'KERNEL=="hugepages" MODE="0660" GROUP="qat"' >> ${D}/etc/udev/rules.d/00-qat.rules
 
   install -D -m 0755 ${S}/quickassist/lookaside/access_layer/src/build/linux_2.6/user_space/libqat_s.so ${D}${base_libdir}
+  install -D -m 0755 ${S}/quickassist/lookaside/access_layer/src/build/linux_2.6/user_space/libqat.a ${D}${base_libdir}
+  install -D -m 0755 ${S}/quickassist/utilities/osal/src/build/linux_2.6/user_space/libosal_s.so ${D}${base_libdir}
+  install -D -m 0755 ${S}/quickassist/utilities/osal/src/build/linux_2.6/user_space/libosal.a ${D}${base_libdir}
+  install -D -m 0755 ${S}/quickassist/lookaside/access_layer/src/qat_direct/src/build/linux_2.6/user_space/libadf.a ${D}${base_libdir}
   install -D -m 0755 ${S}/quickassist/utilities/libusdm_drv/libusdm_drv_s.so ${D}${base_libdir}
+  install -D -m 0755 ${S}/quickassist/utilities/libusdm_drv/libusdm_drv.a ${D}${base_libdir}
   install -D -m 0750 ${S}/quickassist/utilities/adf_ctl/adf_ctl ${D}${sbindir}
 
   install -D -m 640 ${S}/quickassist/utilities/adf_ctl/conf_files/c3xxx_dev0.conf  ${D}${sysconfdir}
@@ -119,6 +130,12 @@ do_install() {
   install -m 0755 ${S}/quickassist/qat/fw/qat_895xcc_mmp.bin  ${D}${base_libdir}/firmware
   install -m 0755 ${S}/quickassist/qat/fw/qat_d15xx.bin  ${D}${base_libdir}/firmware
   install -m 0755 ${S}/quickassist/qat/fw/qat_d15xx_mmp.bin  ${D}${base_libdir}/firmware
+
+  install -m 640 ${S}/quickassist/include/*.h  ${D}${includedir}
+  install -m 640 ${S}/quickassist/include/dc/*.h  ${D}${includedir}/dc/
+  install -m 640 ${S}/quickassist/include/lac/*.h  ${D}${includedir}/lac/
+  install -m 640 ${S}/quickassist/lookaside/access_layer/include/*.h  ${D}${includedir}
+  install -m 640 ${S}/quickassist/utilities/libusdm_drv/*.h  ${D}${includedir}
 
   install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/calgary  ${D}${base_libdir}/firmware
   install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/calgary32  ${D}${base_libdir}/firmware
