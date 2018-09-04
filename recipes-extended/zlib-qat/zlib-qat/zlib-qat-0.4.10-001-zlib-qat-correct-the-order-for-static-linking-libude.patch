@@ -1,0 +1,31 @@
+From 7d74f6aa82042c2bb03e46fafe580bf4d117a24a Mon Sep 17 00:00:00 2001
+From: "Tan, Raymond" <raymond.tan@intel.com>
+Date: Thu, 16 Aug 2018 14:29:05 +0800
+Subject: [PATCH 3/3] zlib-qat: correct the order for static linking libudev
+
+Upstream-Status: Inappropriate [Configuration]
+
+This changes the order of linking command to link libudev after libadf
+to avoid undefined reference on udev.
+
+Signed-off-by: Tan, Raymond <raymond.tan@intel.com>
+---
+ contrib/qat/qat_zlib_test/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/contrib/qat/qat_zlib_test/Makefile b/contrib/qat/qat_zlib_test/Makefile
+index bfcf86d..0498da8 100644
+--- a/contrib/qat/qat_zlib_test/Makefile
++++ b/contrib/qat/qat_zlib_test/Makefile
+@@ -101,7 +101,7 @@ ifdef WITH_CPA_MUX
+ endif
+ 
+ SHAREDLIBQAT= -Wl,-rpath,$(ZLIB_ROOT) -L$(ZLIB_ROOT) -lz -ldl -lrt -lpthread
+-STATICLIBQAT= $(ZLIB_ROOT)/libz.a $(LIBQAT) $(UDEV) -l$(DRIVER) -l$(ADFPROXY) -losal -lcrypto -ldl -lrt -lpthread 
++STATICLIBQAT= $(ZLIB_ROOT)/libz.a $(LIBQAT) -l$(DRIVER) -l$(ADFPROXY) -losal -lcrypto -ldl -lrt -lpthread $(UDEV)
+ 
+ ifeq ($(ZLIB_MEMORY_DRIVER),usdm_drv)
+     STATICLIBQAT+= $(CMN_ROOT)/libusdm_drv.a  
+-- 
+1.9.1
+

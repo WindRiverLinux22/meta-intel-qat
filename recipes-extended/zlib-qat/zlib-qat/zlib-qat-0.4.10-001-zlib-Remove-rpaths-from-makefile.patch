@@ -1,0 +1,63 @@
+From d14d6ea2072ede5d1afddf738cb1801263e90d70 Mon Sep 17 00:00:00 2001
+From: "Tan, Raymond" <raymond.tan@intel.com>
+Date: Fri, 10 Aug 2018 15:45:38 +0800
+Subject: [PATCH 2/3] zlib: Remove rpaths from makefile
+
+Upstream-Status: Inappropriate [configuration]
+
+This removes references to RPATHS that are no longer
+necesary when building using bitbake.
+
+Signed-off-by: Tan, Raymond <raymond.tan@intel.com>
+---
+ Makefile.in                        | 9 +++++----
+ contrib/qat/qat_zlib_test/Makefile | 3 ---
+ 2 files changed, 5 insertions(+), 7 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 0100f59..8978ef1 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -59,12 +59,13 @@ ICP_LAC_API_DIR=$(ICP_API_DIR)/lac/
+ ICP_DC_API_DIR=$(ICP_API_DIR)/dc/
+ CFLAGS+=-D_GNU_SOURCE -I$(ICP_API_DIR) -I$(ICP_DC_API_DIR) -I$(ICP_LAC_API_DIR) -I$(ICP_SAL_API_DIR)
+ SFLAGS+=-D_GNU_SOURCE -I$(ICP_API_DIR) -I$(ICP_DC_API_DIR) -I$(ICP_LAC_API_DIR) -I$(ICP_SAL_API_DIR)
+-ADDITIONAL_LDFLAGS+=-Wl,-rpath,$(ZLIB_ROOT) -lz
+-SHARED_APP_FLAGS=-Wl,-rpath,$(ZLIB_ROOT) -L$(ZLIB_ROOT) -lz
++#ADDITIONAL_LDFLAGS+=-Wl,-rpath,$(ZLIB_ROOT) -lz
++#SHARED_APP_FLAGS=-Wl,-rpath,$(ZLIB_ROOT) -L$(ZLIB_ROOT) -lz
++SHARED_APP_FLAGS=-L$(ZLIB_ROOT) -lz
+ 
+ ifdef ICP_BUILD_OUTPUT
+     TEST_LDFLAGS+=-L$(ICP_BUILD_OUTPUT)
+-    ADDITIONAL_LDFLAGS+=-Wl,-rpath,$(ICP_BUILD_OUTPUT) -L$(ICP_BUILD_OUTPUT)
++#    ADDITIONAL_LDFLAGS+=-Wl,-rpath,$(ICP_BUILD_OUTPUT) -L$(ICP_BUILD_OUTPUT)
+ endif
+ 
+ ifdef UPSTREAM_DRIVER_CMN_ROOT
+@@ -91,7 +92,7 @@ ADDITIONAL_SHAREDLIBC=-L$(ICP_BUILD_OUTPUT) -l$(DRIVER)_s -lpthread -lrt
+ 
+ ifeq ($(ZLIB_MEMORY_DRIVER),usdm_drv)
+ TEST_LDFLAGS+= $(CMN_ROOT)/libusdm_drv.a
+-ADDITIONAL_LDFLAGS+=-Wl,-rpath,$(CMN_ROOT) -L$(CMN_ROOT) -lusdm_drv_s
++#ADDITIONAL_LDFLAGS+=-Wl,-rpath,$(CMN_ROOT) -L$(CMN_ROOT) -lusdm_drv_s
+ endif
+ 
+ STATICLIB=libz.a
+diff --git a/contrib/qat/qat_zlib_test/Makefile b/contrib/qat/qat_zlib_test/Makefile
+index 47829ac..bfcf86d 100644
+--- a/contrib/qat/qat_zlib_test/Makefile
++++ b/contrib/qat/qat_zlib_test/Makefile
+@@ -85,9 +85,6 @@ COVERAGE_OBJS =
+ EXE=
+ LIBQAT=
+ UDEV=
+-ifdef ICP_BUILD_OUTPUT
+-    LIBQAT+= -Wl,-rpath,$(ICP_BUILD_OUTPUT) -L$(ICP_BUILD_OUTPUT)
+-endif
+ 
+ ifdef UPSTREAM_DRIVER_CMN_ROOT
+     DRIVER=qat
+-- 
+1.9.1
+
