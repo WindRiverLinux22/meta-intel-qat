@@ -8,7 +8,7 @@ LIC_FILES_CHKSUM = "\
                     file://${COMMON_LICENSE_DIR}/BSD;md5=3775480a712fc46a69647678acb234cb \
                     "
 
-DEPENDS += "zlib openssl"
+DEPENDS += "zlib openssl10"
 PROVIDES += "virtual/qat"
 
 SRC_URI="file://qat16_2.3.0-34-qat-fix-for-cross-compilation-issue.patch \
