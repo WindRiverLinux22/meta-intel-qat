@@ -2,20 +2,20 @@ require zlib-qat.inc
 
 DEPENDS += "qat17"
 
-SRC_URI += "https://01.org/sites/default/files/downloads/intelr-quickassist-technology/zlibshim0.4.10-001.tar.gz;name=zlibqat \
+SRC_URI += "https://01.org/sites/default/files/downloads/zlibshim0.4.10-003.tar.gz;name=zlibqat \
            file://zlib-qat-0.4.10-001-zlib-qat-add-a-install-target-to-makefile.patch \
            file://zlib-qat-0.4.10-001-zlib-Remove-rpaths-from-makefile.patch \
            file://zlib-qat-0.4.10-001-zlib-qat-correct-the-order-for-static-linking-libude.patch \
            "
 
-SRC_URI[zlibqat.md5sum] = "449e5b8dd41e49df1cced144b54d5bc1"
-SRC_URI[zlibqat.sha256sum] = "d9d288951a1c4b92d3261d2fcbbacf79168b09bd6528fea31fa82bb7c3139f03"
+SRC_URI[zlibqat.md5sum] = "cea60976411bcb8378adbe1007f7fa6a"
+SRC_URI[zlibqat.sha256sum] = "b01f40e2df1a456435972ba46812a23f898e4a592b17ed76240f836b5b992bbd"
 
-ZLIB_QAT_VERSION = "0.4.10-001"
+ZLIB_QAT_VERSION = "0.4.10-003"
 
 export ZLIB_MEMORY_DRIVER = "usdm_drv"
-export CMN_ROOT = "${STAGING_DIR_TARGET}/lib"
-export UPSTREAM_DRIVER_CMN_ROOT = "${STAGING_DIR_TARGET}/lib"
+export CMN_ROOT = "${STAGING_DIR_TARGET}${base_libdir}"
+export UPSTREAM_DRIVER_CMN_ROOT = "${STAGING_DIR_TARGET}${base_libdir}"
 
 zlibqat_do_patch() {
         cd ${WORKDIR}
