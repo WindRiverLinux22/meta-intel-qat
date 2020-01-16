@@ -21,11 +21,19 @@ SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar
            file://qat17_4.1.0-00022-qat-use-static-lib-for-linking.patch \
            file://qat17_4.7.0-00006-Link-driver-with-object-files.patch \
            file://qat17_4.7.0-00006-Drop-pr_warning-definition.patch \
+           file://qat17_4.7.0-00006-Switch-to-skcipher-API.patch;apply=0 \
           "
 
-python __anonymous () {
+do_patch[depends] += "virtual/kernel:do_shared_workdir"
+
+do_patch_append () {
     if d.getVar("KERNEL_VERSION") >= "5.5%":
-        d.appendVar('SRC_URI', "file://qat17_4.7.0-00006-Switch-to-skcipher-API.patch")
+        bb.build.exec_func('do_switch_to_skcipher_api', d)
+}
+
+do_switch_to_skcipher_api () {
+    cd "${S}"
+    patch -p1 < "${WORKDIR}/qat17_4.7.0-00006-Switch-to-skcipher-API.patch"
 }
 
 SRC_URI[md5sum] = "ac939b51cc8836c182e31e309c065002"
