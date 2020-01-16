@@ -1,0 +1,31 @@
+From 058673d6798b835dce7f27fe172b7727bbaf30cf Mon Sep 17 00:00:00 2001
+From: Yongxin Liu <yongxin.liu@windriver.com>
+Date: Wed, 15 Jan 2020 15:25:15 +0000
+Subject: [PATCH] qat: Drop pr_warning definition
+
+In mainline kernel commit 61ff72f40168 ("printk: Drop pr_warning
+definition"), pr_warning was dropped.
+
+Upstream-Status: Inappropriate [Code released in tarball form only]
+
+Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
+---
+ quickassist/utilities/libusdm_drv/linux/include/qae_mem_utils.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/quickassist/utilities/libusdm_drv/linux/include/qae_mem_utils.h b/quickassist/utilities/libusdm_drv/linux/include/qae_mem_utils.h
+index f4a56dc..d88e762 100644
+--- a/quickassist/utilities/libusdm_drv/linux/include/qae_mem_utils.h
++++ b/quickassist/utilities/libusdm_drv/linux/include/qae_mem_utils.h
+@@ -93,7 +93,7 @@ MALLOC_DECLARE(M_QAE_MEM);
+ 
+ #define mm_info(...) pr_info(USDM_MOD __VA_ARGS__)
+ 
+-#define mm_warning(...) pr_warning(USDM_MOD __VA_ARGS__)
++#define mm_warning(...) pr_warn(USDM_MOD __VA_ARGS__)
+ 
+ /*define types which need to vary between 32 and 64 bit*/
+ #define QAE_PAGE_SHIFT 12
+-- 
+2.24.1
+

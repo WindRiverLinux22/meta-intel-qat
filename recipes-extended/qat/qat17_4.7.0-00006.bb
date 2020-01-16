@@ -12,17 +12,24 @@ PROVIDES += "virtual/qat"
 
 TARGET_CC_ARCH += "${LDFLAGS}"
 
-SRC_URI="https://01.org/sites/default/files/downloads/intelr-quickassist-technology/qat1.7.l.${PV}.tar.gz;subdir=qat17 \
-         file://qat16_2.3.0-34-qat-remove-local-path-from-makefile.patch \
-         file://qat16_2.6.0-65-qat-override-CC-LD-AR-only-when-it-is-not-define.patch \
-         file://qat17_0.6.0-1-qat-update-KDIR-for-cross-compilation.patch \
-         file://qat17_0.8.0-37-qat-added-include-dir-path.patch \
-         file://qat17_0.9.0-4-qat-add-install-target-and-add-folder.patch \
-         file://qat17_4.1.0-00022-qat-use-static-lib-for-linking.patch \
-         "
+SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar.gz;subdir=qat17 \
+           file://qat16_2.3.0-34-qat-remove-local-path-from-makefile.patch \
+           file://qat16_2.6.0-65-qat-override-CC-LD-AR-only-when-it-is-not-define.patch \
+           file://qat17_0.6.0-1-qat-update-KDIR-for-cross-compilation.patch \
+           file://qat17_0.8.0-37-qat-added-include-dir-path.patch \
+           file://qat17_0.9.0-4-qat-add-install-target-and-add-folder.patch \
+           file://qat17_4.1.0-00022-qat-use-static-lib-for-linking.patch \
+           file://qat17_4.7.0-00006-Link-driver-with-object-files.patch \
+           file://qat17_4.7.0-00006-Drop-pr_warning-definition.patch \
+          "
 
-SRC_URI[md5sum] = "2fe81587e8b85747d5461b031241beb2"
-SRC_URI[sha256sum] = "47990b3283ded748799dba42d4b0e1bdc0be3cf3978bd587533cd12788b03856"
+python __anonymous () {
+    if d.getVar("KERNEL_VERSION") >= "5.5%":
+        d.appendVar('SRC_URI', "file://qat17_4.7.0-00006-Switch-to-skcipher-API.patch")
+}
+
+SRC_URI[md5sum] = "ac939b51cc8836c182e31e309c065002"
+SRC_URI[sha256sum] = "5c8bdc35fd7a42f212f1f87eb9e3d8584df7af56dae366debc487981e531fa5c"
 
 COMPATIBLE_MACHINE = "null"
 COMPATIBLE_HOST_x86-x32 = 'null'
@@ -65,12 +72,12 @@ do_compile () {
   export LD="${LD} --hash-style=gnu"
   export MACHINE="${TARGET_ARCH}"
 
+  cd ${S}/quickassist/qat
+  oe_runmake
+  oe_runmake 'modules_install'
+
   cd ${S}/quickassist
   oe_runmake
-
-  cd ${S}/quickassist/qat
-  oe_runmake 'clean'
-  oe_runmake 'modules_install'
 
   cd ${S}/quickassist/utilities/adf_ctl
   oe_runmake
@@ -109,27 +116,22 @@ do_install() {
   echo 'KERNEL=="uio*" MODE="0660" GROUP="qat"' >> ${D}/etc/udev/rules.d/00-qat.rules
   echo 'KERNEL=="hugepages" MODE="0660" GROUP="qat"' >> ${D}/etc/udev/rules.d/00-qat.rules
 
+  mkdir -p ${D}${base_libdir}
+
   install -D -m 0755 ${S}/quickassist/lookaside/access_layer/src/build/linux_2.6/user_space/libqat_s.so ${D}${base_libdir}
   install -D -m 0755 ${S}/quickassist/lookaside/access_layer/src/build/linux_2.6/user_space/libqat.a ${D}${base_libdir}
   install -D -m 0755 ${S}/quickassist/utilities/osal/src/build/linux_2.6/user_space/libosal_s.so ${D}${base_libdir}
   install -D -m 0755 ${S}/quickassist/utilities/osal/src/build/linux_2.6/user_space/libosal.a ${D}${base_libdir}
-  install -D -m 0755 ${S}/quickassist/lookaside/access_layer/src/qat_direct/src/build/linux_2.6/user_space/libadf.a ${D}${base_libdir}
+  install -D -m 0755 ${S}/quickassist/lookaside/access_layer/src/qat_direct/src/build/linux_2.6/user_space/libadf_user.a ${D}${base_libdir}/libadf.a
   install -D -m 0755 ${S}/quickassist/utilities/libusdm_drv/libusdm_drv_s.so ${D}${base_libdir}
   install -D -m 0755 ${S}/quickassist/utilities/libusdm_drv/libusdm_drv.a ${D}${base_libdir}
   install -D -m 0750 ${S}/quickassist/utilities/adf_ctl/adf_ctl ${D}${sbindir}
 
-  install -D -m 640 ${S}/quickassist/utilities/adf_ctl/conf_files/c3xxx_dev0.conf  ${D}${sysconfdir}
   install -D -m 640 ${S}/quickassist/utilities/adf_ctl/conf_files/*.conf  ${D}${sysconfdir}/conf_files
   install -D -m 640 ${S}/quickassist/utilities/adf_ctl/conf_files/*.conf.vm  ${D}${sysconfdir}/conf_files
 
-  install -m 0755 ${S}/quickassist/qat/fw/qat_c3xxx.bin  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/qat/fw/qat_c3xxx_mmp.bin  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/qat/fw/qat_c62x.bin  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/qat/fw/qat_c62x_mmp.bin  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/qat/fw/qat_895xcc.bin  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/qat/fw/qat_895xcc_mmp.bin  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/qat/fw/qat_d15xx.bin  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/qat/fw/qat_d15xx_mmp.bin  ${D}${base_libdir}/firmware
+  install -m 0755 ${S}/quickassist/qat/fw/qat_d15xx.bin  ${D}${nonarch_base_libdir}/firmware
+  install -m 0755 ${S}/quickassist/qat/fw/qat_d15xx_mmp.bin  ${D}${nonarch_base_libdir}/firmware
 
   install -m 640 ${S}/quickassist/include/*.h  ${D}${includedir}
   install -m 640 ${S}/quickassist/include/dc/*.h  ${D}${includedir}/dc/
@@ -137,25 +139,27 @@ do_install() {
   install -m 640 ${S}/quickassist/lookaside/access_layer/include/*.h  ${D}${includedir}
   install -m 640 ${S}/quickassist/utilities/libusdm_drv/*.h  ${D}${includedir}
 
-  install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/calgary  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/calgary32  ${D}${base_libdir}/firmware
-  install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/canterbury  ${D}${base_libdir}/firmware
+  install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/calgary  ${D}${nonarch_base_libdir}/firmware
+  install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/calgary32  ${D}${nonarch_base_libdir}/firmware
+  install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/canterbury  ${D}${nonarch_base_libdir}/firmware
 
   #install qat source
   cp ${DL_DIR}/qat1.7.l.${PV}.tar.gz ${D}${prefix}/src/qat/
 }
 
-PACKAGES += "${PN}-app ${PN}-src"
+PACKAGES += "${PN}-app"
 
 FILES_${PN}-dev = "${includedir}/ \
+                   ${nonarch_base_libdir}/*.a \
                    "
 
 FILES_${PN} += "\
                 ${libdir}/ \
-                ${base_libdir}/firmware \
+                ${nonarch_base_libdir}/firmware \
                 ${sysconfdir}/ \
                 ${sbindir}/ \
                 ${base_libdir}/*.so \
+                ${prefix}/src/qat \
                 "
 
 FILES_${PN}-dbg += "${sysconfdir}/init.d/.debug/ \
@@ -164,6 +168,3 @@ FILES_${PN}-dbg += "${sysconfdir}/init.d/.debug/ \
 FILES_${PN}-app += "${bindir}/* \
                     ${prefix}/qat \
                     "
-
-FILES_${PN}-src += "${prefix}/src/* \
-                   "
