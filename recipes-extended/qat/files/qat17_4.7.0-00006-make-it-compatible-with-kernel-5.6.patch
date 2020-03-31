@@ -1,0 +1,96 @@
+From 75fe2382f42ac42333a28445bb54132afd9a27a1 Mon Sep 17 00:00:00 2001
+From: Yongxin Liu <yongxin.liu@windriver.com>
+Date: Tue, 31 Mar 2020 19:44:25 +0000
+Subject: [PATCH] qat17: make it compatible with kernel 5.6
+
+1) In kernel commit c766d1472c70 ("y2038: hide timeval/timespec/itimerval
+/itimerspec types"), timespec was hiden, so change timespec to timespec64.
+
+2) CRYPTO_TFM_RES_BAD_KEY_LEN was removed in kernel commit 674f368a952c
+("crypto: remove CRYPTO_TFM_RES_BAD_KEY_LEN"). Add it back, since qat driver
+needs it.
+
+Upstream-Status: Inappropriate [Code released in tarball form only]
+
+Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
+---
+ .../drivers/crypto/qat/qat_common/adf_clock.c  | 18 +++++++++---------
+ .../drivers/crypto/qat/qat_common/qat_algs.c   |  2 ++
+ 2 files changed, 11 insertions(+), 9 deletions(-)
+
+diff --git a/quickassist/qat/drivers/crypto/qat/qat_common/adf_clock.c b/quickassist/qat/drivers/crypto/qat/qat_common/adf_clock.c
+index 8785f67..be3d9b8 100644
+--- a/quickassist/qat/drivers/crypto/qat/qat_common/adf_clock.c
++++ b/quickassist/qat/drivers/crypto/qat/qat_common/adf_clock.c
+@@ -113,7 +113,7 @@ int adf_clock_debugfs_add(struct adf_accel_dev *accel_dev)
+ #endif
+ EXPORT_SYMBOL_GPL(adf_clock_debugfs_add);
+ 
+-static inline s64 timespec_to_us(const struct timespec *ts)
++static inline s64 timespec_to_us(const struct timespec64 *ts)
+ {
+ 	return ((s64)ts->tv_sec * USEC_PER_SEC +
+ 		 (ts->tv_nsec + NSEC_PER_USEC / 2) / NSEC_PER_USEC);
+@@ -129,10 +129,10 @@ static inline s64 timespec_to_us(const struct timespec *ts)
+ static int measure_clock(struct adf_accel_dev *accel_dev,
+ 			 u32 *frequency)
+ {
+-	struct timespec ts1;
+-	struct timespec ts2;
+-	struct timespec ts3;
+-	struct timespec ts4;
++	struct timespec64 ts1;
++	struct timespec64 ts2;
++	struct timespec64 ts3;
++	struct timespec64 ts4;
+ 	u64 delta_us = 0;
+ 	u64 timestamp1 = 0;
+ 	u64 timestamp2 = 0;
+@@ -143,13 +143,13 @@ static int measure_clock(struct adf_accel_dev *accel_dev,
+ 		return -EIO;
+ 
+ 	do {
+-		getnstimeofday(&ts1);
++		ktime_get_real_ts64(&ts1);
+ 		if (adf_get_fw_timestamp(accel_dev, &timestamp1)) {
+ 			dev_err(&GET_DEV(accel_dev),
+ 				"Failed to get fw timestamp\n");
+ 			return -EIO;
+ 		}
+-		getnstimeofday(&ts2);
++		ktime_get_real_ts64(&ts2);
+ 		delta_us = timespec_to_us(&ts2) - timespec_to_us(&ts1);
+ 	} while (delta_us > MEASURE_CLOCK_DELTA_THRESHOLD &&
+ 		 ++tries < MEASURE_CLOCK_RETRIES);
+@@ -162,13 +162,13 @@ static int measure_clock(struct adf_accel_dev *accel_dev,
+ 
+ 	tries = 0;
+ 	do {
+-		getnstimeofday(&ts3);
++		ktime_get_real_ts64(&ts3);
+ 		if (adf_get_fw_timestamp(accel_dev, &timestamp2)) {
+ 			dev_err(&GET_DEV(accel_dev),
+ 				"Failed to get fw timestamp\n");
+ 			return -EIO;
+ 		}
+-		getnstimeofday(&ts4);
++		ktime_get_real_ts64(&ts4);
+ 		delta_us = timespec_to_us(&ts4) - timespec_to_us(&ts3);
+ 	} while (delta_us > MEASURE_CLOCK_DELTA_THRESHOLD &&
+ 		 ++tries < MEASURE_CLOCK_RETRIES);
+diff --git a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
+index c4edb3c..b509dca 100644
+--- a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
++++ b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
+@@ -73,6 +73,8 @@
+ 				       ICP_QAT_HW_CIPHER_KEY_CONVERT, \
+ 				       ICP_QAT_HW_CIPHER_DECRYPT)
+ 
++#define CRYPTO_TFM_RES_BAD_KEY_LEN     0x00200000
++
+ static DEFINE_MUTEX(algs_lock);
+ static unsigned int active_devs;
+ 
+-- 
+2.24.1
+
