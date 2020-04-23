@@ -25,7 +25,7 @@ SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar
            file://qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch;apply=0 \
           "
 
-do_patch[depends] += "virtual/kernel:do_shared_workdir"
+do_fetch[depends] += "virtual/kernel:do_shared_workdir"
 
 do_patch_append () {
     if d.getVar("KERNEL_VERSION") >= "5.5%":
