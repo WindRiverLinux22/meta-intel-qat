@@ -24,6 +24,7 @@ SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar
            file://qat17_4.7.0-00006-Switch-to-skcipher-API.patch;apply=0 \
            file://qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch;apply=0 \
            file://qat17_4.7.0-00006-crypto-qat-adf_aer-Remove-pci_cleanup_aer_uncorrect_.patch \
+           file://qat17_4.7.0-00006-qat-replace-linux-cryptohash.h-with-crypto-sha.h-for.patch \
           "
 
 do_fetch[depends] += "virtual/kernel:do_shared_workdir"
