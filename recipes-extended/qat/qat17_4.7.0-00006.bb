@@ -30,9 +30,12 @@ SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar
 do_fetch[depends] += "virtual/kernel:do_shared_workdir"
 
 do_patch_append () {
-    if d.getVar("KERNEL_VERSION") >= "5.5%":
+    kernel_version = int(d.getVar("KERNEL_VERSION").split(".")[0])
+    kernel_patchlevel = int(d.getVar("KERNEL_VERSION").split(".")[1])
+
+    if kernel_version >= 5 and kernel_patchlevel >= 5:
         bb.build.exec_func('do_switch_to_skcipher_api', d)
-    if d.getVar("KERNEL_VERSION") >= "5.6%":
+    if kernel_version >= 5 and kernel_patchlevel >= 6:
         bb.build.exec_func('do_patch_for_kernel_5_6', d)
 }
 
