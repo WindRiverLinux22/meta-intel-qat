@@ -1,0 +1,33 @@
+From bf4053e4685bbbf84e6f91d18809dbf4487d03d9 Mon Sep 17 00:00:00 2001
+From: Yongxin Liu <yongxin.liu@windriver.com>
+Date: Wed, 25 Nov 2020 07:58:07 +0800
+Subject: [PATCH] qat: overwrite KBUILD_BUILTIN in kernel's Makefile
+
+Since kernel v5.10-rc1, commit 6212804f2d78 ("kbuild: do not create
+built-in objects for external module builds"), QAT static libraries
+cannot be created. So add KBUILD_BUILTIN=1 in command line to overwrite
+it in kernel Makefile.
+
+Upstream-Status: Inappropriate [Code released in tarball form only]
+
+Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
+---
+ quickassist/build_system/build_files/OS/linux_2.6_kernel_space_rules.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/quickassist/build_system/build_files/OS/linux_2.6_kernel_space_rules.mk b/quickassist/build_system/build_files/OS/linux_2.6_kernel_space_rules.mk
+index a692b37..302ae19 100644
+--- a/quickassist/build_system/build_files/OS/linux_2.6_kernel_space_rules.mk
++++ b/quickassist/build_system/build_files/OS/linux_2.6_kernel_space_rules.mk
+@@ -72,7 +72,7 @@ endif
+ 
+ $(LIB_STATIC): dirs
+ 	@echo 'Creating static library ${LIB_STATIC}'; \
+-	$(MAKE) -C $(KERNEL_SOURCE_ROOT)/ M=$(PWD) obj-m=""; \
++	$(MAKE) -C $(KERNEL_SOURCE_ROOT)/ M=$(PWD) obj-m="" KBUILD_BUILTIN=1; \
+ 	echo 'Copying outputs';\
+ 	test -f lib.a  &&  (ar -t lib.a | xargs ar -rcsD $(LIB_STATIC)); \
+ 	test -f $(LIB_STATIC)  &&  mv -f $(LIB_STATIC) $($(PROG_ACY)_FINAL_OUTPUT_DIR)/$(LIB_STATIC); \
+-- 
+2.14.4
+
