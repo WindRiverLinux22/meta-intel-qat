@@ -1,6 +1,6 @@
-From b19449e3c11ffd477a3db60f21e14930ed07f251 Mon Sep 17 00:00:00 2001
+From d12ae3d48d429e24ad4b0f219a16e09af8da3b1a Mon Sep 17 00:00:00 2001
 From: Yongxin Liu <yongxin.liu@windriver.com>
-Date: Wed, 15 Jan 2020 13:50:38 +0000
+Date: Thu, 28 Jan 2021 10:02:22 +0000
 Subject: [PATCH] qat: Switch to skcipher API
 
 The patch is derived from mainline kernel commit 7fe948a52287
@@ -10,32 +10,31 @@ Upstream-Status: Inappropriate [Code released in tarball form only]
 
 Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
 ---
- .../drivers/crypto/qat/qat_common/qat_algs.c  | 676 ++++++++++--------
+ .../drivers/crypto/qat/qat_common/qat_algs.c  | 674 ++++++++++--------
  .../crypto/qat/qat_common/qat_crypto.h        |   6 +-
- 2 files changed, 394 insertions(+), 288 deletions(-)
+ 2 files changed, 394 insertions(+), 286 deletions(-)
 
 diff --git a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
-index c4edb3c..35bca76 100644
+index a7961a4..f600ad3 100644
 --- a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
 +++ b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
-@@ -44,14 +44,15 @@
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
--#ifndef QAT_AEAD_OLD_SUPPORTED
- #include <linux/module.h>
+@@ -49,6 +49,7 @@
  #include <linux/slab.h>
  #include <linux/crypto.h>
  #include <crypto/internal/aead.h>
 +#include <crypto/internal/skcipher.h>
  #include <crypto/aes.h>
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0))
+ #include <crypto/sha1.h>
+@@ -57,6 +58,7 @@
  #include <crypto/sha.h>
+ #endif
  #include <crypto/hash.h>
 +#include <crypto/hmac.h>
  #include <crypto/algapi.h>
  #include <crypto/authenc.h>
  #include <linux/dma-mapping.h>
-@@ -113,11 +114,16 @@ struct qat_alg_aead_ctx {
+@@ -118,11 +120,16 @@ struct qat_alg_aead_ctx {
  	struct crypto_shash *hash_tfm;
  	enum icp_qat_hw_auth_algo qat_hash_alg;
  	struct qat_crypto_instance *inst;
@@ -54,7 +53,7 @@ index c4edb3c..35bca76 100644
  	struct icp_qat_hw_cipher_algo_blk *enc_cd;
  	struct icp_qat_hw_cipher_algo_blk *dec_cd;
  	dma_addr_t enc_cd_paddr;
-@@ -125,7 +131,7 @@ struct qat_alg_ablkcipher_ctx {
+@@ -130,7 +137,7 @@ struct qat_alg_ablkcipher_ctx {
  	struct icp_qat_fw_la_bulk_req enc_fw_req;
  	struct icp_qat_fw_la_bulk_req dec_fw_req;
  	struct qat_crypto_instance *inst;
@@ -63,7 +62,7 @@ index c4edb3c..35bca76 100644
  };
  
  static int qat_get_inter_state_size(enum icp_qat_hw_auth_algo qat_hash_alg)
-@@ -149,9 +155,6 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
+@@ -154,9 +161,6 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
  				  unsigned int auth_keylen)
  {
  	SHASH_DESC_ON_STACK(shash, ctx->hash_tfm);
@@ -73,7 +72,7 @@ index c4edb3c..35bca76 100644
  	int block_size = crypto_shash_blocksize(ctx->hash_tfm);
  	int digest_size = crypto_shash_digestsize(ctx->hash_tfm);
  	__be32 *hash_state_out;
-@@ -160,7 +163,6 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
+@@ -165,7 +169,6 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
  
  	memset(ctx->ipad, 0, block_size);
  	memset(ctx->opad, 0, block_size);
@@ -81,7 +80,7 @@ index c4edb3c..35bca76 100644
  	shash->tfm = ctx->hash_tfm;
  
  	if (auth_keylen > block_size) {
-@@ -178,8 +180,8 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
+@@ -183,8 +186,8 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
  	for (i = 0; i < block_size; i++) {
  		char *ipad_ptr = ctx->ipad + i;
  		char *opad_ptr = ctx->opad + i;
@@ -92,7 +91,7 @@ index c4edb3c..35bca76 100644
  	}
  
  	if (crypto_shash_init(shash))
-@@ -193,22 +195,22 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
+@@ -198,22 +201,22 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
  
  	switch (ctx->qat_hash_alg) {
  	case ICP_QAT_HW_AUTH_ALGO_SHA1:
@@ -121,7 +120,7 @@ index c4edb3c..35bca76 100644
  		break;
  	default:
  		return -EFAULT;
-@@ -229,22 +231,22 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
+@@ -234,22 +237,22 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
  
  	switch (ctx->qat_hash_alg) {
  	case ICP_QAT_HW_AUTH_ALGO_SHA1:
@@ -150,7 +149,7 @@ index c4edb3c..35bca76 100644
  		break;
  	default:
  		return -EFAULT;
-@@ -254,7 +256,24 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
+@@ -259,7 +262,24 @@ static int qat_alg_do_precomputes(struct icp_qat_hw_auth_algo_blk *hash,
  	return 0;
  }
  
@@ -176,7 +175,7 @@ index c4edb3c..35bca76 100644
  {
  	header->hdr_flags =
  		ICP_QAT_FW_COMN_HDR_FLAGS_BUILD(ICP_QAT_FW_COMN_REQ_FLAG_SET);
-@@ -264,12 +283,12 @@ static void qat_alg_init_common_hdr(struct icp_qat_fw_comn_req_hdr *header)
+@@ -269,12 +289,12 @@ static void qat_alg_init_common_hdr(struct icp_qat_fw_comn_req_hdr *header)
  					    QAT_COMN_PTR_TYPE_SGL);
  	ICP_QAT_FW_LA_PARTIAL_SET(header->serv_specif_flags,
  				  ICP_QAT_FW_LA_PARTIAL_NONE);
@@ -193,7 +192,7 @@ index c4edb3c..35bca76 100644
  }
  
  static int qat_alg_aead_init_enc_session(struct crypto_aead *aead_tfm,
-@@ -304,7 +323,7 @@ static int qat_alg_aead_init_enc_session(struct crypto_aead *aead_tfm,
+@@ -309,7 +329,7 @@ static int qat_alg_aead_init_enc_session(struct crypto_aead *aead_tfm,
  		return -EFAULT;
  
  	/* Request setup */
@@ -202,7 +201,7 @@ index c4edb3c..35bca76 100644
  	header->service_cmd_id = ICP_QAT_FW_LA_CMD_CIPHER_HASH;
  	ICP_QAT_FW_LA_DIGEST_IN_BUFFER_SET(header->serv_specif_flags,
  					   ICP_QAT_FW_LA_DIGEST_IN_BUFFER);
-@@ -391,7 +410,7 @@ static int qat_alg_aead_init_dec_session(struct crypto_aead *aead_tfm,
+@@ -396,7 +416,7 @@ static int qat_alg_aead_init_dec_session(struct crypto_aead *aead_tfm,
  		return -EFAULT;
  
  	/* Request setup */
@@ -211,7 +210,7 @@ index c4edb3c..35bca76 100644
  	header->service_cmd_id = ICP_QAT_FW_LA_CMD_HASH_CIPHER;
  	ICP_QAT_FW_LA_DIGEST_IN_BUFFER_SET(header->serv_specif_flags,
  					   ICP_QAT_FW_LA_DIGEST_IN_BUFFER);
-@@ -445,17 +464,17 @@ static int qat_alg_aead_init_dec_session(struct crypto_aead *aead_tfm,
+@@ -450,17 +470,17 @@ static int qat_alg_aead_init_dec_session(struct crypto_aead *aead_tfm,
  	return 0;
  }
  
@@ -234,7 +233,7 @@ index c4edb3c..35bca76 100644
  	header->service_cmd_id = ICP_QAT_FW_LA_CMD_CIPHER;
  	cd_pars->u.s.content_desc_params_sz =
  				sizeof(struct icp_qat_hw_cipher_algo_blk) >> 3;
-@@ -467,28 +486,28 @@ static void qat_alg_ablkcipher_init_com(struct qat_alg_ablkcipher_ctx *ctx,
+@@ -472,28 +492,28 @@ static void qat_alg_ablkcipher_init_com(struct qat_alg_ablkcipher_ctx *ctx,
  	ICP_QAT_FW_COMN_NEXT_ID_SET(cd_ctrl, ICP_QAT_FW_SLICE_DRAM_WR);
  }
  
@@ -271,7 +270,7 @@ index c4edb3c..35bca76 100644
  	cd_pars->u.s.content_desc_addr = ctx->dec_cd_paddr;
  
  	if (mode != ICP_QAT_HW_CIPHER_CTR_MODE)
-@@ -548,86 +567,110 @@ static int qat_alg_aead_init_sessions(struct crypto_aead *tfm, const u8 *key,
+@@ -553,86 +573,110 @@ static int qat_alg_aead_init_sessions(struct crypto_aead *tfm, const u8 *key,
  	if (qat_alg_aead_init_dec_session(tfm, alg, &keys, mode))
  		goto error;
  
@@ -425,7 +424,7 @@ index c4edb3c..35bca76 100644
  }
  
  static void qat_alg_free_bufl(struct qat_crypto_instance *inst,
-@@ -675,8 +718,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
+@@ -680,8 +724,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
  	dma_addr_t blp;
  	dma_addr_t bloutp = 0;
  	struct scatterlist *sg;
@@ -435,7 +434,7 @@ index c4edb3c..35bca76 100644
  
  	if (unlikely(!n))
  		return -EINVAL;
-@@ -688,7 +730,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
+@@ -693,7 +736,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
  
  	blp = dma_map_single(dev, bufl, sz, DMA_TO_DEVICE);
  	if (unlikely(dma_mapping_error(dev, blp)))
@@ -444,7 +443,7 @@ index c4edb3c..35bca76 100644
  
  	for_each_sg(sgl, sg, n, i) {
  		int y = sg_nctr;
-@@ -701,7 +743,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
+@@ -706,7 +749,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
  						      DMA_BIDIRECTIONAL);
  		bufl->bufers[y].len = sg->length;
  		if (unlikely(dma_mapping_error(dev, bufl->bufers[y].addr)))
@@ -453,7 +452,7 @@ index c4edb3c..35bca76 100644
  		sg_nctr++;
  	}
  	bufl->num_bufs = sg_nctr;
-@@ -713,16 +755,15 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
+@@ -718,16 +761,15 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
  		struct qat_alg_buf *bufers;
  
  		n = sg_nents(sglout);
@@ -473,7 +472,7 @@ index c4edb3c..35bca76 100644
  		bufers = buflout->bufers;
  		for_each_sg(sglout, sg, n, i) {
  			int y = sg_nctr;
-@@ -734,7 +775,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
+@@ -739,7 +781,7 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
  							sg->length,
  							DMA_BIDIRECTIONAL);
  			if (unlikely(dma_mapping_error(dev, bufers[y].addr)))
@@ -482,7 +481,7 @@ index c4edb3c..35bca76 100644
  			bufers[y].len = sg->length;
  			sg_nctr++;
  		}
-@@ -749,8 +790,20 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
+@@ -754,8 +796,20 @@ static int qat_alg_sgl_to_bufl(struct qat_crypto_instance *inst,
  		qat_req->buf.sz_out = 0;
  	}
  	return 0;
@@ -505,7 +504,7 @@ index c4edb3c..35bca76 100644
  	for (i = 0; i < n; i++)
  		if (!dma_mapping_error(dev, bufl->bufers[i].addr))
  			dma_unmap_single(dev, bufl->bufers[i].addr,
-@@ -760,17 +813,8 @@ err:
+@@ -765,17 +819,8 @@ err:
  	if (!dma_mapping_error(dev, blp))
  		dma_unmap_single(dev, blp, sz, DMA_TO_DEVICE);
  	kfree(bufl);
@@ -525,7 +524,7 @@ index c4edb3c..35bca76 100644
  	return -ENOMEM;
  }
  
-@@ -789,19 +833,25 @@ static void qat_aead_alg_callback(struct icp_qat_fw_la_resp *qat_resp,
+@@ -794,19 +839,25 @@ static void qat_aead_alg_callback(struct icp_qat_fw_la_resp *qat_resp,
  	areq->base.complete(&areq->base, res);
  }
  
@@ -556,7 +555,7 @@ index c4edb3c..35bca76 100644
  }
  
  void qat_alg_callback(void *resp)
-@@ -823,7 +873,7 @@ static int qat_alg_aead_dec(struct aead_request *areq)
+@@ -828,7 +879,7 @@ static int qat_alg_aead_dec(struct aead_request *areq)
  	struct icp_qat_fw_la_auth_req_params *auth_param;
  	struct icp_qat_fw_la_bulk_req *msg;
  	int digst_size = crypto_aead_authsize(aead_tfm);
@@ -565,7 +564,7 @@ index c4edb3c..35bca76 100644
  
  	ret = qat_alg_sgl_to_bufl(ctx->inst, areq->src, areq->dst, qat_req);
  	if (unlikely(ret))
-@@ -844,13 +894,14 @@ static int qat_alg_aead_dec(struct aead_request *areq)
+@@ -849,13 +900,14 @@ static int qat_alg_aead_dec(struct aead_request *areq)
  	auth_param = (void *)((uint8_t *)cipher_param + sizeof(*cipher_param));
  	auth_param->auth_off = 0;
  	auth_param->auth_len = areq->assoclen + cipher_param->cipher_length;
@@ -584,7 +583,7 @@ index c4edb3c..35bca76 100644
  	return -EINPROGRESS;
  }
  
-@@ -864,7 +915,7 @@ static int qat_alg_aead_enc(struct aead_request *areq)
+@@ -869,7 +921,7 @@ static int qat_alg_aead_enc(struct aead_request *areq)
  	struct icp_qat_fw_la_auth_req_params *auth_param;
  	struct icp_qat_fw_la_bulk_req *msg;
  	uint8_t *iv = areq->iv;
@@ -593,7 +592,7 @@ index c4edb3c..35bca76 100644
  
  	ret = qat_alg_sgl_to_bufl(ctx->inst, areq->src, areq->dst, qat_req);
  	if (unlikely(ret))
-@@ -890,159 +941,230 @@ static int qat_alg_aead_enc(struct aead_request *areq)
+@@ -895,159 +947,230 @@ static int qat_alg_aead_enc(struct aead_request *areq)
  
  	do {
  		ret = adf_send_message(ctx->inst->sym_tx, (uint32_t *)msg);
@@ -906,7 +905,7 @@ index c4edb3c..35bca76 100644
  static int qat_alg_aead_init(struct crypto_aead *tfm,
  			     enum icp_qat_hw_auth_algo hash,
  			     const char *hash_name)
-@@ -1085,30 +1207,30 @@ static void qat_alg_aead_exit(struct crypto_aead *tfm)
+@@ -1090,30 +1213,30 @@ static void qat_alg_aead_exit(struct crypto_aead *tfm)
  
  	dev = &GET_DEV(inst->accel_dev);
  	if (ctx->enc_cd) {
@@ -944,7 +943,7 @@ index c4edb3c..35bca76 100644
  	struct qat_crypto_instance *inst = ctx->inst;
  	struct device *dev;
  
-@@ -1117,15 +1239,15 @@ static void qat_alg_ablkcipher_exit(struct crypto_tfm *tfm)
+@@ -1122,15 +1245,15 @@ static void qat_alg_ablkcipher_exit(struct crypto_tfm *tfm)
  
  	dev = &GET_DEV(inst->accel_dev);
  	if (ctx->enc_cd) {
@@ -964,7 +963,7 @@ index c4edb3c..35bca76 100644
  		dma_free_coherent(dev,
  				  sizeof(struct icp_qat_hw_cipher_algo_blk),
  				  ctx->dec_cd, ctx->dec_cd_paddr);
-@@ -1187,92 +1309,75 @@ static struct aead_alg qat_aeads[] = { {
+@@ -1192,92 +1315,75 @@ static struct aead_alg qat_aeads[] = { {
  	.maxauthsize = SHA512_DIGEST_SIZE,
  } };
  
@@ -1112,7 +1111,7 @@ index c4edb3c..35bca76 100644
  	ret = crypto_register_aeads(qat_aeads, ARRAY_SIZE(qat_aeads));
  	if (ret)
  		goto unreg_algs;
-@@ -1282,7 +1387,7 @@ unlock:
+@@ -1287,7 +1393,7 @@ unlock:
  	return ret;
  
  unreg_algs:
@@ -1121,7 +1120,7 @@ index c4edb3c..35bca76 100644
  	goto unlock;
  }
  
-@@ -1293,9 +1398,8 @@ void qat_algs_unregister(void)
+@@ -1298,7 +1404,7 @@ void qat_algs_unregister(void)
  		goto unlock;
  
  	crypto_unregister_aeads(qat_aeads, ARRAY_SIZE(qat_aeads));
@@ -1130,8 +1129,6 @@ index c4edb3c..35bca76 100644
  
  unlock:
  	mutex_unlock(&algs_lock);
- }
--#endif
 diff --git a/quickassist/qat/drivers/crypto/qat/qat_common/qat_crypto.h b/quickassist/qat/drivers/crypto/qat/qat_common/qat_crypto.h
 index dc0273f..300bb91 100644
 --- a/quickassist/qat/drivers/crypto/qat/qat_common/qat_crypto.h
@@ -1157,5 +1154,5 @@ index dc0273f..300bb91 100644
  
  #endif
 -- 
-2.24.1
+2.29.2
 

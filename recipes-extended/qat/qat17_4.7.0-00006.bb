@@ -27,6 +27,7 @@ SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar
            file://qat17_4.7.0-00006-qat-replace-linux-cryptohash.h-with-crypto-sha.h-for.patch \
            file://qat17_4.7.0-00006-overwrite-KBUILD_BUILTIN-in-kernel-s-Makefile.patch \
            file://qat17_4.7.0-00006-crypto-qat-Silence-smp_processor_id-warning.patch \
+           file://qat17_4.7.0-00006-qat-include-sha1.h-and-sha2.h-instead-of-sha.h-in-ke.patch \
           "
 
 do_fetch[depends] += "virtual/kernel:do_shared_workdir"
