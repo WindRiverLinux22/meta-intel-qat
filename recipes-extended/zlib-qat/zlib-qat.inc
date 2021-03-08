@@ -8,7 +8,7 @@ HOMEPAGE = "http://zlib.net/"
 SECTION = "libs"
 LICENSE = "Zlib & GPLv2 & BSD"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/zlib-${ZLIB_VERSION}/zlib.h;beginline=4;endline=23;md5=fde612df1e5933c428b73844a0c494fd \
-		    file://${COMMON_LICENSE_DIR}/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6 \
+		    file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6 \
 		    file://${COMMON_LICENSE_DIR}/BSD;md5=3775480a712fc46a69647678acb234cb"
 
 # For target side versions of openssl enable support for OCF Linux driver
