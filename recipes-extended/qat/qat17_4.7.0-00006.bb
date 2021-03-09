@@ -30,7 +30,7 @@ SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar
            file://qat17_4.7.0-00006-qat-include-sha1.h-and-sha2.h-instead-of-sha.h-in-ke.patch \
           "
 
-do_fetch[depends] += "virtual/kernel:do_shared_workdir"
+do_patch[depends] += "virtual/kernel:do_shared_workdir"
 
 do_patch_append () {
     kernel_version = int(d.getVar("KERNEL_VERSION").split(".")[0])
@@ -43,13 +43,19 @@ do_patch_append () {
 }
 
 do_switch_to_skcipher_api () {
-    cd "${S}"
-    patch -p1 < "${WORKDIR}/qat17_4.7.0-00006-Switch-to-skcipher-API.patch"
+    if [ ! -e ${S}/patches/qat17_4.7.0-00006-Switch-to-skcipher-API.patch.applied ]; then
+        cd "${S}"
+        patch -p1 < "${WORKDIR}/qat17_4.7.0-00006-Switch-to-skcipher-API.patch"
+        touch ${S}/patches/qat17_4.7.0-00006-Switch-to-skcipher-API.patch.applied
+    fi
 }
 
 do_patch_for_kernel_5_6 () {
-    cd "${S}"
-    patch -p1 < "${WORKDIR}/qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch"
+    if [ ! -e ${S}/patches/qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch.applied ]; then
+        cd "${S}"
+        patch -p1 < "${WORKDIR}/qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch"
+        touch ${S}/patches/qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch.applied
+    fi
 }
 
 
