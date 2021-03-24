@@ -1,0 +1,47 @@
+From 3b45583612822851a0841cff8381d8795c831a23 Mon Sep 17 00:00:00 2001
+From: Yongxin Liu <yongxin.liu@windriver.com>
+Date: Tue, 23 Mar 2021 09:31:25 +0000
+Subject: [PATCH] qat17: use namespace CRYPTO_INTERNAL
+
+Due to kernel commit 0eb76ba29d16 ("crypto: remove cipher routines from
+public crypto API") in v5.12-rc1, some crypto APIs are exported into a new
+namespace CRYPTO_INTERNAL.
+
+Upstream-Status: Inappropriate [Code released in tarball form only]
+
+Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
+---
+ quickassist/lookaside/access_layer/src/linux/icp_qa_module.c | 3 +++
+ .../osal/src/linux/kernel_space/OsalCryptoInterface.c        | 5 +++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c b/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c
+index c9c6946..a9dd704 100644
+--- a/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c
++++ b/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c
+@@ -120,3 +120,6 @@ module_exit(kapi_mod_exit);
+ MODULE_DESCRIPTION("Intel(R) Quickassist Technology Acceleration Driver");
+ MODULE_AUTHOR("Intel");
+ MODULE_LICENSE("Dual BSD/GPL");
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,12,0))
++MODULE_IMPORT_NS(CRYPTO_INTERNAL);
++#endif
+diff --git a/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c b/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
+index 483aef2..a150a86 100644
+--- a/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
++++ b/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
+@@ -66,6 +66,11 @@
+ 
+ #include "Osal.h"
+ #include <linux/crypto.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,12,0))
++#include <crypto/internal/cipher.h>
++#include <linux/module.h>
++MODULE_IMPORT_NS(CRYPTO_INTERNAL);
++#endif
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0))
+ #include <crypto/sha1.h>
+ #include <crypto/sha2.h>
+-- 
+2.29.2
+
