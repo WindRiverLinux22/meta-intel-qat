@@ -1,7 +1,7 @@
-From b21929c42aca4bc80f6c48b5ac31bf20165b2f3e Mon Sep 17 00:00:00 2001
+From 0a881aefea89006f21b82fcafc5a422b04fc0c9a Mon Sep 17 00:00:00 2001
 From: Rahul Kumar Gupta <rahul.kumarxx.gupta@intel.com>
-Date: Fri, 25 Mar 2016 18:02:37 +0800
-Subject: [PATCH] qat: override CC LD AR only when it is not define
+Date: Mon, 12 Apr 2021 08:40:47 +0800
+Subject: [PATCH 03/11] qat: override CC LD AR only when it is not define
 
 Upstream-Status: Inappropriate [Configuration]
 
@@ -14,7 +14,7 @@ Signed-off-by: Rahul Kumar Gupta <rahul.kumarxx.gupta@intel.com>
  1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/quickassist/build_system/build_files/Core/ia.mk b/quickassist/build_system/build_files/Core/ia.mk
-index 4a4d123..f9aca23 100755
+index 230ee0f..f6fc755 100644
 --- a/quickassist/build_system/build_files/Core/ia.mk
 +++ b/quickassist/build_system/build_files/Core/ia.mk
 @@ -67,9 +67,9 @@
@@ -29,6 +29,7 @@ index 4a4d123..f9aca23 100755
 +AR ?= $(CROSS_COMPILE)ar
  else
  $(error MACHINE is undefined. Please set your target i.e. x86_64 \
-	"-> setenv MACHINE x86_64 or export MACHINE=x86_64")
---
-1.9.1
+ 	"-> setenv MACHINE x86_64 or export MACHINE=x86_64")
+-- 
+2.14.5
+

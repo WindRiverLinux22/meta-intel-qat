@@ -1,0 +1,61 @@
+From 563cc2fc8d1b120a63aa9d157effed04d39bd58f Mon Sep 17 00:00:00 2001
+From: venkatasubramanian pattu <venkatasubramanianx.pattu@intel.com>
+Date: Mon, 6 Jul 2015 15:57:20 +0800
+Subject: [PATCH 01/11] qat: fix for cross-compilation issue
+
+Upstream-Status: Inappropriate [Configuration]
+
+Ensure that we are not using host compiler.
+
+Signed-off-by: venkatasubramanian pattu <venkatasubramanianx.pattu@intel.com>
+Signed-off-by: Anuj Mittal <anujx.mittal@intel.com>
+[YL: modified for patching to qat17_4.12.0-00011]
+Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
+---
+ quickassist/lookaside/access_layer/src/sample_code/functional/common.mk | 2 +-
+ .../access_layer/src/sample_code/functional/dc/dc_dp_sample/Makefile    | 2 +-
+ quickassist/lookaside/access_layer/src/sample_code/performance/Makefile | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/quickassist/lookaside/access_layer/src/sample_code/functional/common.mk b/quickassist/lookaside/access_layer/src/sample_code/functional/common.mk
+index 8c2fa3c..9402873 100644
+--- a/quickassist/lookaside/access_layer/src/sample_code/functional/common.mk
++++ b/quickassist/lookaside/access_layer/src/sample_code/functional/common.mk
+@@ -150,7 +150,7 @@ ifeq ($(ICP_OS_LEVEL),user_space)
+ ############################################################
+ 
+ ifneq ($(PREBUILD_BINS),0)
+-    ADDITIONAL_OBJECTS += -L/usr/Lib -L$(ICP_BUILD_OUTPUT)
++    ADDITIONAL_OBJECTS += -L$(ICP_BUILD_OUTPUT)
+ 
+     ifeq ($(WITH_UPSTREAM),1)
+        ifeq ($(WITH_ICP_TARGET),1)
+diff --git a/quickassist/lookaside/access_layer/src/sample_code/functional/dc/dc_dp_sample/Makefile b/quickassist/lookaside/access_layer/src/sample_code/functional/dc/dc_dp_sample/Makefile
+index 7a4d593..06cbc3d 100644
+--- a/quickassist/lookaside/access_layer/src/sample_code/functional/dc/dc_dp_sample/Makefile
++++ b/quickassist/lookaside/access_layer/src/sample_code/functional/dc/dc_dp_sample/Makefile
+@@ -70,7 +70,7 @@ ifeq ($(ICP_OS_LEVEL),user_space)
+ # Build user space executible
+ #
+ ############################################################
+-ADDITIONAL_OBJECTS += -L/usr/Lib -lpthread -lcrypto
++ADDITIONAL_OBJECTS += -lpthread -lcrypto
+ 
+ USER_SOURCE_FILES += ../../common/cpa_sample_utils.c cpa_dc_dp_sample.c
+ USER_SOURCE_FILES += cpa_dc_dp_sample_user.c
+diff --git a/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile b/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile
+index 4b6857f..3914c1b 100644
+--- a/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile
++++ b/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile
+@@ -341,7 +341,7 @@ endif
+ 
+ 
+ 
+-ADDITIONAL_OBJECTS += -L/Lib -lpthread
++ADDITIONAL_OBJECTS += -lpthread
+ ADDITIONAL_OBJECTS += -lcrypto 
+ ifeq ($(WITH_UPSTREAM),1)
+ ifeq ($(OS),linux)
+-- 
+2.14.5
+

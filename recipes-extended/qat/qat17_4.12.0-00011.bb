@@ -12,56 +12,24 @@ PROVIDES += "virtual/qat"
 
 TARGET_CC_ARCH += "${LDFLAGS}"
 
-SRC_URI = "https://01.org/sites/default/files/downloads/qat1.7.l.4.7.0-00006.tar.gz;subdir=qat17 \
-           file://qat16_2.3.0-34-qat-remove-local-path-from-makefile.patch \
-           file://qat16_2.6.0-65-qat-override-CC-LD-AR-only-when-it-is-not-define.patch \
-           file://qat17_0.6.0-1-qat-update-KDIR-for-cross-compilation.patch \
-           file://qat17_0.8.0-37-qat-added-include-dir-path.patch \
-           file://qat17_0.9.0-4-qat-add-install-target-and-add-folder.patch \
-           file://qat17_4.1.0-00022-qat-use-static-lib-for-linking.patch \
-           file://qat17_4.7.0-00006-Link-driver-with-object-files.patch \
-           file://qat17_4.7.0-00006-Drop-pr_warning-definition.patch \
-           file://qat17_4.7.0-00006-Switch-to-skcipher-API.patch;apply=0 \
-           file://qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch;apply=0 \
-           file://qat17_4.7.0-00006-crypto-qat-adf_aer-Remove-pci_cleanup_aer_uncorrect_.patch \
-           file://qat17_4.7.0-00006-qat-replace-linux-cryptohash.h-with-crypto-sha.h-for.patch \
-           file://qat17_4.7.0-00006-overwrite-KBUILD_BUILTIN-in-kernel-s-Makefile.patch \
-           file://qat17_4.7.0-00006-crypto-qat-Silence-smp_processor_id-warning.patch \
-           file://qat17_4.7.0-00006-qat-include-sha1.h-and-sha2.h-instead-of-sha.h-in-ke.patch \
-           file://qat17_4.7.0-00006-qat17-use-namespace-CRYPTO_INTERNAL.patch \
+SRC_URI = "https://01.org/sites/default/files/downloads//qat1.7.l.4.12.0-00011.tar.gz;subdir=qat17 \
+           file://0001-qat-fix-for-cross-compilation-issue.patch \
+           file://0002-qat-remove-local-path-from-makefile.patch \
+           file://0003-qat-override-CC-LD-AR-only-when-it-is-not-define.patch \
+           file://0004-update-KDIR-for-cross-compilation.patch \
+           file://0005-Added-include-dir-path.patch \
+           file://0006-qat-add-install-target-and-add-folder.patch \
+           file://0007-qat-use-static-lib-for-linking-under-cpa-sample-code.patch \
+           file://0008-qat-overwrite-KBUILD_BUILTIN-in-kernel-s-Makefile.patch \
+           file://0009-crypto-qat-Silence-smp_processor_id-warning.patch \
+           file://0010-qat-include-sha1.h-and-sha2.h-instead-of-sha.h-in-ke.patch \
+           file://0011-qat17-use-namespace-CRYPTO_INTERNAL.patch \
           "
 
-do_patch[depends] += "virtual/kernel:do_shared_workdir"
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
 
-do_patch_append () {
-    kernel_version = int(d.getVar("KERNEL_VERSION").split(".")[0])
-    kernel_patchlevel = int(d.getVar("KERNEL_VERSION").split(".")[1])
-
-    if kernel_version >= 5 and kernel_patchlevel >= 5:
-        bb.build.exec_func('do_switch_to_skcipher_api', d)
-    if kernel_version >= 5 and kernel_patchlevel >= 6:
-        bb.build.exec_func('do_patch_for_kernel_5_6', d)
-}
-
-do_switch_to_skcipher_api () {
-    if [ ! -e ${S}/patches/qat17_4.7.0-00006-Switch-to-skcipher-API.patch.applied ]; then
-        cd "${S}"
-        patch -p1 < "${WORKDIR}/qat17_4.7.0-00006-Switch-to-skcipher-API.patch"
-        touch ${S}/patches/qat17_4.7.0-00006-Switch-to-skcipher-API.patch.applied
-    fi
-}
-
-do_patch_for_kernel_5_6 () {
-    if [ ! -e ${S}/patches/qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch.applied ]; then
-        cd "${S}"
-        patch -p1 < "${WORKDIR}/qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch"
-        touch ${S}/patches/qat17_4.7.0-00006-make-it-compatible-with-kernel-5.6.patch.applied
-    fi
-}
-
-
-SRC_URI[md5sum] = "ac939b51cc8836c182e31e309c065002"
-SRC_URI[sha256sum] = "5c8bdc35fd7a42f212f1f87eb9e3d8584df7af56dae366debc487981e531fa5c"
+SRC_URI[md5sum] = "23d962944ae22ef14ff880fdbff4223b"
+SRC_URI[sha256sum] = "6b8d643780b2640d084f5bd50546c8dae4ae9ec50cf167660a0ebdc55619eb2e"
 
 COMPATIBLE_MACHINE = "null"
 COMPATIBLE_HOST_x86-x32 = 'null'
@@ -90,6 +58,7 @@ export WITH_UPSTREAM = "1"
 export WITH_CMDRV = "1"
 export KERNEL_SOURCE_DIR = "${ICP_ROOT}/quickassist/qat/"
 export ICP_NO_CLEAN = "1"
+export ICP_QDM_IOMMU = "1"
 
 inherit module
 inherit update-rc.d

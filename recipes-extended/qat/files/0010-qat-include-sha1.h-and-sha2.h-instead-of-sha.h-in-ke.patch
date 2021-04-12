@@ -1,8 +1,8 @@
-From f27fe17a282206b6d4e8c3ad8d5aac8757f38ab5 Mon Sep 17 00:00:00 2001
+From c9e04ec8d8be3a1f21a5bdc6c5c79f50191d57dd Mon Sep 17 00:00:00 2001
 From: Yongxin Liu <yongxin.liu@windriver.com>
 Date: Thu, 28 Jan 2021 13:07:59 +0800
-Subject: [PATCH] qat: include sha1.h and sha2.h instead of sha.h in kernel
- v5.11
+Subject: [PATCH 10/11] qat: include sha1.h and sha2.h instead of sha.h in
+ kernel v5.11
 
 In kernel commit a24d22b225ce ("crypto: sha - split sha.h into sha1.h and sha2.h"),
 <crypto/sha.h> was split into two headers <crypto/sha1.h> and <crypto/sha2.h>.
@@ -11,17 +11,17 @@ Upstream-Status: Inappropriate [Code released in tarball form only]
 
 Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
 ---
- quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c           | 5 +++++
- .../utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c    | 7 +++++--
- 2 files changed, 10 insertions(+), 2 deletions(-)
+ quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c             | 5 +++++
+ .../utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c      | 5 +++++
+ 2 files changed, 10 insertions(+)
 
 diff --git a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
-index c4edb3c..a7961a4 100644
+index 37ac11e..08680ca 100644
 --- a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
 +++ b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
-@@ -50,7 +50,12 @@
- #include <linux/crypto.h>
+@@ -52,7 +52,12 @@
  #include <crypto/internal/aead.h>
+ #include <crypto/internal/skcipher.h>
  #include <crypto/aes.h>
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0))
 +#include <crypto/sha1.h>
@@ -33,27 +33,19 @@ index c4edb3c..a7961a4 100644
  #include <crypto/algapi.h>
  #include <crypto/authenc.h>
 diff --git a/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c b/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
-index 92ee35b..483aef2 100644
+index 9d2e85c..de24fa0 100644
 --- a/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
 +++ b/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
-@@ -66,15 +66,18 @@
- 
- #include "Osal.h"
- #include <linux/crypto.h>
--#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0))
-+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0))
-+#include <crypto/sha1.h>
-+#include <crypto/sha2.h>
-+#elif (LINUX_VERSION_CODE >= KERNEL_VERSION(5,8,0))
- #include <crypto/sha.h>
- #else
- #include <linux/cryptohash.h>
-+#include <crypto/sha.h>
- #endif
+@@ -69,7 +69,12 @@
  #include <linux/version.h>
  #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29))
  #include <crypto/internal/hash.h>
--#include <crypto/sha.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0))
++#include <crypto/sha1.h>
++#include <crypto/sha2.h>
++#else
+ #include <crypto/sha.h>
++#endif
  
  #define OSAL_MAX_SHASH_DECSIZE 512
  

@@ -1,7 +1,7 @@
-From 026fd275834ac4e345464c8ce2b0163d052d0262 Mon Sep 17 00:00:00 2001
+From 54d537415c88b52c6cc682db17ecd0b6c077a8bf Mon Sep 17 00:00:00 2001
 From: "Tan, Raymond" <raymond.tan@intel.com>
-Date: Wed, 30 May 2018 13:27:03 +0800
-Subject: [PATCH] qat-use-static-lib-for-linking-under-cpa-sample-code
+Date: Mon, 12 Apr 2021 08:52:17 +0800
+Subject: [PATCH 07/11] qat-use-static-lib-for-linking-under-cpa-sample-code
 
 Upstream-Status: Inappropriate [Configuration]
 
@@ -14,17 +14,18 @@ Signed-off-by: Tan, Raymond <raymond.tan@intel.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile b/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile
-index 3a0fb37..5b7b3fa 100644
+index 3914c1b..a22e366 100644
 --- a/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile
 +++ b/quickassist/lookaside/access_layer/src/sample_code/performance/Makefile
-@@ -209,7 +209,7 @@ ifeq ($(WITH_CMDRV),1)
-	ifeq ($(WITH_ICP_TARGET),1)
-	ADDITIONAL_OBJECTS += $(ICP_BUILD_OUTPUT)/libqae_mem.a
-	else
--	ADDITIONAL_OBJECTS += $(ICP_BUILD_OUTPUT)/libusdm_drv_s.so
-+	ADDITIONAL_OBJECTS += $(ICP_BUILD_OUTPUT)/libusdm_drv.a
-	endif
- endif
- #endif
---
-1.9.1
+@@ -319,7 +319,7 @@ ifneq ($(PREBUILD_BINS),0)
+         ifeq ($(WITH_ICP_TARGET),1)
+             ADDITIONAL_OBJECTS += $(ICP_BUILD_OUTPUT)/libqae_mem.a
+         else
+-            ADDITIONAL_OBJECTS += $(ICP_BUILD_OUTPUT)/libusdm_drv_s.so
++            ADDITIONAL_OBJECTS += $(ICP_BUILD_OUTPUT)/libusdm_drv.a
+         endif
+     endif
+     #endif
+-- 
+2.14.5
+
