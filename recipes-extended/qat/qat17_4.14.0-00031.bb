@@ -7,12 +7,12 @@ LIC_FILES_CHKSUM = "\
                     file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6 \
                     file://${COMMON_LICENSE_DIR}/BSD;md5=3775480a712fc46a69647678acb234cb \
                     "
-DEPENDS += "boost udev zlib openssl"
+DEPENDS += "boost udev zlib openssl yasm-native"
 PROVIDES += "virtual/qat"
 
 TARGET_CC_ARCH += "${LDFLAGS}"
 
-SRC_URI = "https://01.org/sites/default/files/downloads//qat1.7.l.4.12.0-00011.tar.gz;subdir=qat17 \
+SRC_URI = "https://downloadmirror.intel.com/30178/eng/QAT1.7.L.4.14.0-00031.tar.gz;subdir=qat17 \
            file://0001-qat-fix-for-cross-compilation-issue.patch \
            file://0002-qat-remove-local-path-from-makefile.patch \
            file://0003-qat-override-CC-LD-AR-only-when-it-is-not-define.patch \
@@ -20,16 +20,15 @@ SRC_URI = "https://01.org/sites/default/files/downloads//qat1.7.l.4.12.0-00011.t
            file://0005-Added-include-dir-path.patch \
            file://0006-qat-add-install-target-and-add-folder.patch \
            file://0007-qat-use-static-lib-for-linking-under-cpa-sample-code.patch \
-           file://0008-qat-overwrite-KBUILD_BUILTIN-in-kernel-s-Makefile.patch \
            file://0009-crypto-qat-Silence-smp_processor_id-warning.patch \
-           file://0010-qat-include-sha1.h-and-sha2.h-instead-of-sha.h-in-ke.patch \
            file://0011-qat17-use-namespace-CRYPTO_INTERNAL.patch \
+           file://0001-usdm_drv-convert-mutex_lock-to-mutex_trylock-to-avio.patch \
           "
 
 do_configure[depends] += "virtual/kernel:do_shared_workdir"
 
-SRC_URI[md5sum] = "23d962944ae22ef14ff880fdbff4223b"
-SRC_URI[sha256sum] = "6b8d643780b2640d084f5bd50546c8dae4ae9ec50cf167660a0ebdc55619eb2e"
+SRC_URI[md5sum] = "a6ff665184159583542dac89b9226f09"
+SRC_URI[sha256sum] = "a68dfaea4308e0bb5f350b7528f1a076a0c6ba3ec577d60d99dc42c49307b76e"
 
 COMPATIBLE_MACHINE = "null"
 COMPATIBLE_HOST_x86-x32 = 'null'
@@ -145,7 +144,7 @@ do_install() {
   install -m 0755 ${S}/quickassist/lookaside/access_layer/src/sample_code/performance/compression/canterbury  ${D}${nonarch_base_libdir}/firmware
 
   #install qat source
-  cp ${DL_DIR}/qat1.7.l.${PV}.tar.gz ${D}${prefix}/src/qat/
+  cp ${DL_DIR}/QAT1.7.L.${PV}.tar.gz ${D}${prefix}/src/qat/
 }
 
 PACKAGES += "${PN}-app"

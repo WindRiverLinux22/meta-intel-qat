@@ -1,4 +1,4 @@
-From fc2ae28063d10721282a4e6009cec9143ce37c80 Mon Sep 17 00:00:00 2001
+From b6f1c6465ce5d9d3792b8e00fe0a94ddd2724b91 Mon Sep 17 00:00:00 2001
 From: "Tan, Raymond" <raymond.tan@intel.com>
 Date: Mon, 4 Jun 2018 09:26:33 +0800
 Subject: [PATCH 06/11] qat-add-install-target-and-add-folder
@@ -13,18 +13,18 @@ Signed-off-by: Tan, Raymond <raymond.tan@intel.com>
  1 file changed, 22 insertions(+), 3 deletions(-)
 
 diff --git a/quickassist/Makefile b/quickassist/Makefile
-index 558f85d..4cc0f2b 100644
+index 34aaae021a40..292a19921832 100644
 --- a/quickassist/Makefile
 +++ b/quickassist/Makefile
-@@ -96,6 +96,7 @@ ICP_BUILD_OUTPUT?=build_$(DATE)
- ICP_TOP_ENV=$(ICP_BUILDSYSTEM_PATH)/build_files/env_files/
- export ICP_ACCEL_INC=YES
+@@ -98,6 +98,7 @@ export ICP_ACCEL_INC=YES
+ export ICP_PARAM_CHECK ?= y
+ export CNV_STRICT_MODE ?= 1
  LAC_LIB_DIR=$(LAC_PATH)/build/libs
 +MODULE_INSTALLPATH=$(SAMPLE_BUILD_OUTPUT)/lib/modules/$(QAT_KERNEL_VER)/updates/drivers/crypto/qat
  
  #Release Package build steps
  ALL_TARGETS = lac_user lac_kernel
-@@ -113,10 +114,14 @@ all: $(ALL_TARGETS)
+@@ -115,10 +116,14 @@ all: $(ALL_TARGETS)
  
  user: lac_lib_dir libosal_user lac_user
  
@@ -41,7 +41,7 @@ index 558f85d..4cc0f2b 100644
  
  #
  # Common memory driver
-@@ -199,8 +204,22 @@ ifeq ($(ICP_NO_CLEAN),)
+@@ -201,8 +206,22 @@ ifeq ($(ICP_NO_CLEAN),)
  endif
  
  
@@ -66,5 +66,5 @@ index 558f85d..4cc0f2b 100644
  lac_lib_dir: clean
  	test -d $(LAC_LIB_DIR) || mkdir -p $(LAC_LIB_DIR);
 -- 
-2.14.5
+2.29.2
 

@@ -1,4 +1,4 @@
-From 9b2b7a79fc9d9323fe9ec44de7619ea175c45bc1 Mon Sep 17 00:00:00 2001
+From 6a1fa62ffa4acd6e8e4d4f648e19363a2ed5ef74 Mon Sep 17 00:00:00 2001
 From: Yongxin Liu <yongxin.liu@windriver.com>
 Date: Tue, 23 Mar 2021 09:31:25 +0000
 Subject: [PATCH 11/11] qat17: use namespace CRYPTO_INTERNAL
@@ -11,12 +11,13 @@ Upstream-Status: Inappropriate [Code released in tarball form only]
 
 Signed-off-by: Yongxin Liu <yongxin.liu@windriver.com>
 ---
- quickassist/lookaside/access_layer/src/linux/icp_qa_module.c         | 3 +++
- .../utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c      | 5 +++++
- 2 files changed, 8 insertions(+)
+ quickassist/lookaside/access_layer/src/linux/icp_qa_module.c | 3 +++
+ quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c     | 5 +++++
+ .../osal/src/linux/kernel_space/OsalCryptoInterface.c        | 5 +++++
+ 3 files changed, 13 insertions(+)
 
 diff --git a/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c b/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c
-index 413eb07..f3a371e 100644
+index db51add84592..209b3054aa8c 100644
 --- a/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c
 +++ b/quickassist/lookaside/access_layer/src/linux/icp_qa_module.c
 @@ -120,3 +120,6 @@ module_exit(kapi_mod_exit);
@@ -26,14 +27,31 @@ index 413eb07..f3a371e 100644
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,12,0))
 +MODULE_IMPORT_NS(CRYPTO_INTERNAL);
 +#endif
+diff --git a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
+index 23249de3db39..0e61954c0150 100644
+--- a/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
++++ b/quickassist/qat/drivers/crypto/qat/qat_common/qat_algs.c
+@@ -8,7 +8,12 @@
+ #include <crypto/internal/aead.h>
+ #include <crypto/internal/skcipher.h>
+ #include <crypto/aes.h>
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,11,0))
++#include <crypto/sha1.h>
++#include <crypto/sha2.h>
++#else
+ #include <crypto/sha.h>
++#endif
+ #include <crypto/hash.h>
+ #include <crypto/algapi.h>
+ #include <crypto/authenc.h>
 diff --git a/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c b/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
-index de24fa0..96c29c0 100644
+index ec536607989a..9d62bb8749d5 100644
 --- a/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
 +++ b/quickassist/utilities/osal/src/linux/kernel_space/OsalCryptoInterface.c
-@@ -75,6 +75,11 @@
- #else
- #include <crypto/sha.h>
- #endif
+@@ -76,6 +76,11 @@
+ #endif /* end of 5.11.0, 2.6.29 checks */
+ #if (LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,29))
+ #include <crypto/internal/hash.h>
 +#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,12,0))
 +#include <crypto/internal/cipher.h>
 +#include <linux/module.h>
@@ -43,5 +61,5 @@ index de24fa0..96c29c0 100644
  #define OSAL_MAX_SHASH_DECSIZE 512
  
 -- 
-2.14.5
+2.29.2
 
