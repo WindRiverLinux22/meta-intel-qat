@@ -31,8 +31,8 @@ SRC_URI[md5sum] = "a6ff665184159583542dac89b9226f09"
 SRC_URI[sha256sum] = "a68dfaea4308e0bb5f350b7528f1a076a0c6ba3ec577d60d99dc42c49307b76e"
 
 COMPATIBLE_MACHINE = "null"
-COMPATIBLE_HOST_x86-x32 = 'null'
-COMPATIBLE_HOST_libc-musl_class-target = 'null'
+COMPATIBLE_HOST:x86-x32 = 'null'
+COMPATIBLE_HOST:libc-musl:class-target = 'null'
 
 S = "${WORKDIR}/qat17"
 ICP_TOOLS = "accelcomp"
@@ -65,7 +65,7 @@ INITSCRIPT_NAME = "qat_service"
 
 PARALLEL_MAKE = ""
 
-EXTRA_OEMAKE_append = " CFLAGS+='-fgnu89-inline -fPIC'"
+EXTRA_OEMAKE:append = " CFLAGS+='-fgnu89-inline -fPIC'"
 EXTRA_OEMAKE = "-e MAKEFLAGS="
 
 do_compile () {
@@ -149,11 +149,11 @@ do_install() {
 
 PACKAGES += "${PN}-app"
 
-FILES_${PN}-dev = "${includedir}/ \
+FILES:${PN}-dev = "${includedir}/ \
                    ${nonarch_base_libdir}/*.a \
                    "
 
-FILES_${PN} += "\
+FILES:${PN} += "\
                 ${libdir}/ \
                 ${nonarch_base_libdir}/firmware \
                 ${sysconfdir}/ \
@@ -162,9 +162,9 @@ FILES_${PN} += "\
                 ${prefix}/src/qat \
                 "
 
-FILES_${PN}-dbg += "${sysconfdir}/init.d/.debug/ \
+FILES:${PN}-dbg += "${sysconfdir}/init.d/.debug/ \
                     "
 
-FILES_${PN}-app += "${bindir}/* \
+FILES:${PN}-app += "${bindir}/* \
                     ${prefix}/qat \
                     "

@@ -75,6 +75,6 @@ do_install() {
 }
 
 # module.bbclass will reset FILES variable
-FILES_${PN} += " \
+FILES:${PN} += " \
 		${sysconfdir}/zlib_conf/ \
 		"

@@ -17,7 +17,7 @@ DEPENDS += "cryptodev-linux pkgconfig udev"
 
 SRC_URI = "http://www.zlib.net/zlib-${ZLIB_VERSION}.tar.gz;name=zlib \
            "
-SRC_URI_append_libc-musl = " file://0001-qat_zlib.h-Add-pthread.h-for-MUSL.patch"
+SRC_URI:append:libc-musl = " file://0001-qat_zlib.h-Add-pthread.h-for-MUSL.patch"
 
 SRC_URI[zlib.md5sum] = "44d667c142d7cda120332623eab69f40"
 SRC_URI[zlib.sha256sum] = "36658cb768a54c1d4dec43c3116c27ed893e88b02ecfcb44f2166f9c0b7f2a0d"
@@ -72,16 +72,16 @@ do_install() {
 
 PACKAGE_BEFORE_PN = "${PN}-app"
 
-FILES_${PN} += " \
+FILES:${PN} += " \
 		${sysconfdir}/zlib_conf/ \
 		"
 
-FILES_${PN}-app += " \
+FILES:${PN}-app += " \
 		${bindir}/* \
 	"
 
-FILES_${PN}-dbg += " \
+FILES:${PN}-dbg += " \
 		${bindir}/.debug \
 		"
 
-EXCLUDE_FROM_WORLD_core2-32-intel-common = "1"
+EXCLUDE_FROM_WORLD:core2-32-intel-common = "1"

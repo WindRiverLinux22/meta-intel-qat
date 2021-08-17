@@ -37,7 +37,7 @@ zlibqat_do_patch() {
         mv ${S}/.pc ${S}/.pc-zlibqat
 }
 
-do_install_append() {
+do_install:append() {
         install -m 660  ${MEM_PATH}/config/c3xxx/multi_thread_optimized/*	${D}${sysconfdir}/zlib_conf/
         install -m 660  ${MEM_PATH}/config/c6xx/multi_thread_optimized/*	${D}${sysconfdir}/zlib_conf/
 }
