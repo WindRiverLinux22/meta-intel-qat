@@ -6,10 +6,10 @@ in the zlib software library via the Intel QuickAssist Technology"
 
 HOMEPAGE = "http://zlib.net/"
 SECTION = "libs"
-LICENSE = "Zlib & GPLv2 & BSD"
+LICENSE = "Zlib & GPLv2 & BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/zlib-${ZLIB_VERSION}/zlib.h;beginline=4;endline=23;md5=fde612df1e5933c428b73844a0c494fd \
 		    file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6 \
-		    file://${COMMON_LICENSE_DIR}/BSD;md5=3775480a712fc46a69647678acb234cb"
+		    file://${COMMON_LICENSE_DIR}/BSD-3-Clause;md5=550794465ba0ec5312d6919e203a55f9"
 
 # For target side versions of openssl enable support for OCF Linux driver
 # if they are available.
